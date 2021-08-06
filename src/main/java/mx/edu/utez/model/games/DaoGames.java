@@ -24,22 +24,22 @@ public class DaoGames {
            rs= cstm.executeQuery();
 
            while (rs.next()){
-               BeanCategory category= new BeanCategory();
-               BeanGames games= new BeanGames();
+               BeanCategory beanCategory= new BeanCategory();
+               BeanGames beanGames= new BeanGames();
 
-               category.setIdCategory(rs.getInt("idCategory"));
-               category.setName(rs.getString("name"));
-               category.setStatus(rs.getInt("status"));
+               beanCategory.setIdCategory(rs.getInt("idCategory"));
+               beanCategory.setName(rs.getString("name"));
+               beanCategory.setStatus(rs.getInt("status"));
 
-               games.setIdGames(rs.getInt("idGames"));
-               games.setName(rs.getString("name"));
-               games.setImgGame(Base64.getEncoder().encodeToString(rs.getBytes("imgGames")));
-               games.setDatePremiere(rs.getDate("datePremiere"));
-               games.setStatus(rs.getInt("status"));
+               beanGames.setIdGames(rs.getInt("idGames"));
+               beanGames.setName(rs.getString("name"));
+               beanGames.setImgGame(Base64.getEncoder().encodeToString(rs.getBytes("imgGames")));
+               beanGames.setDatePremiere(rs.getDate("datePremiere"));
+               beanGames.setStatus(rs.getInt("status"));
 
-               games.setIdCategory(category);
+               beanGames.setCategory_idCategory(beanCategory);
 
-               listGames.add(games);
+               listGames.add(beanGames);
            }
         }catch (SQLException e){
             CONSOLE.error("Ha ocurrido un error: " + e.getMessage());
@@ -55,7 +55,7 @@ public class DaoGames {
         try {
 
             con = ConnectionMySQL.getConnection();
-            cstm = con.prepareCall("SELECT * FROM games AS G INNER JOIN category AS C ON G.idGames = C.idCategory WHERE G.idGames = ?");
+            cstm = con.prepareCall("SELECT * FROM games AS G INNER JOIN category AS C ON G.Category_idCategory = C.idCategory WHERE G.idGames = ?");
             cstm.setInt(1, idGames);
             rs = cstm.executeQuery();
 
@@ -73,7 +73,7 @@ public class DaoGames {
                 games.setDatePremiere(rs.getDate("datePremiere"));
                 games.setStatus(rs.getInt("status"));
 
-                games.setIdCategory(category);
+                games.setCategory_idCategory(category);
 
             }
         }catch (SQLException e){
@@ -88,12 +88,11 @@ public class DaoGames {
         boolean flag = false;
         try{
             con = ConnectionMySQL.getConnection();
-            cstm = con.prepareCall("{call sp_create(?,?,?,?,?)}");
+            cstm = con.prepareCall("{call sp_create(?,?,?,?)}");
             cstm.setString(1, games.getName());
-            cstm.setString(2, games.getImgGame());
+            cstm.setBytes(2, Base64.getDecoder().decode(games.getImgGame()));
             cstm.setDate(3, (Date) games.getDatePremiere());
-            cstm.setInt(4, games.getIdCategory().getIdCategory());
-            cstm.setInt(5, games.getStatus());
+            cstm.setInt(4, games.getCategory_idCategory().getIdCategory());
             cstm.execute();
             flag = true;
         }catch(SQLException e){
@@ -110,11 +109,10 @@ public class DaoGames {
             con = ConnectionMySQL.getConnection();
             cstm = con.prepareCall("{call sp_update(?,?,?,?,?,?}");
             cstm.setString(1, games.getName());
-            cstm.setString(2, games.getImgGame());
+            cstm.setBytes(2, Base64.getDecoder().decode(games.getImgGame()));
             cstm.setDate(3, (Date) games.getDatePremiere());
-            cstm.setInt(4, games.getIdCategory().getIdCategory());
-            cstm.setInt(5, games.getStatus());
-            cstm.setInt(6,games.getIdGames());
+            cstm.setInt(4, games.getCategory_idCategory().getIdCategory());
+            cstm.setInt(5,games.getIdGames());
 
             flag = cstm.execute();
         }catch(SQLException e){
